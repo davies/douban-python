@@ -1,0 +1,8 @@
+README.txt
+setup.py
+douban/__init__.py
+douban_python.egg-info/PKG-INFO
+douban_python.egg-info/SOURCES.txt
+douban_python.egg-info/dependency_links.txt
+douban_python.egg-info/requires.txt
+douban_python.egg-info/top_level.txt
