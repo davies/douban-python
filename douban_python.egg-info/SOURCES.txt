@@ -6,6 +6,7 @@ douban_python.egg-info/SOURCES.txt
 douban_python.egg-info/dependency_links.txt
 douban_python.egg-info/requires.txt
 douban_python.egg-info/top_level.txt
+examples/montypython.py
 tests/test_douban.py
 tests/test_service.py
 tests/testdata.py
