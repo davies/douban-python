@@ -22,3 +22,8 @@ class TestDoubanService:
     def test_query_book_by_tag(self):
         feed = self.client.QueryBookByTag("小说")
         assert len(feed.entry)
+
+    def test_get_tag_feed(self):
+        uri = 'http://api.douban.com/book/subject/1000001/tags'
+        feed = self.client.GetTagFeed(uri)
+        assert any(e.title.text == "第一" for e in feed.entry)
