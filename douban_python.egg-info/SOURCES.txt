@@ -1,5 +1,7 @@
 setup.py
 douban/__init__.py
+douban/client.py
+douban/oauth.py
 douban/service.py
 douban_python.egg-info/PKG-INFO
 douban_python.egg-info/SOURCES.txt
