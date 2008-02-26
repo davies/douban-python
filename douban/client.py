@@ -1,17 +1,17 @@
 # -*- encoding:utf-8 -*-
 
-import httplib
+import httplib,urlparse
 import time
 import oauth
 
-signature_method = oauth.OAuthSignatureMethod_PLAINTEXT()
-#signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
+signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
+
+HOST = 'http://api.douban.com'
+REQUEST_TOKEN_URL = HOST+'/auth/request_token'
+ACCESS_TOKEN_URL = HOST+'/auth/access_token'
+AUTHORIZATION_URL = HOST+'/auth/authorize'
 
 class OAuthClient:
-    REQUEST_TOKEN_URL = '/auth/request_token'
-    ACCESS_TOKEN_URL = '/auth/access_token'
-    AUTHORIZATION_URL = 'http://frodo.douban.com/service/api/auth/authorize'
-
     def __init__(self, server, key=None, secret=None):
         self.server = server
         self.consumer = oauth.OAuthConsumer(key, secret)
@@ -23,18 +23,18 @@ class OAuthClient:
             return True
         
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                http_url=self.REQUEST_TOKEN_URL)
+                http_url=REQUEST_TOKEN_URL)
         oauth_request.sign_request(signature_method, self.consumer, None)
         token = self.fetch_token(oauth_request)
 
         self.authorize_token(token)
         
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                token=token, http_url=self.ACCESS_TOKEN_URL)
+                token=token, http_url=ACCESS_TOKEN_URL)
         oauth_request.sign_request(signature_method, self.consumer, token)
         self.token = self.fetch_token(oauth_request)
-        print 'Got access token:'
-        print self.token.key, self.token.secret
+        #print 'Got access token:'
+        #print self.token.key, self.token.secret
         return True
 
     def fetch_token(self, oauth_request):
@@ -51,17 +51,19 @@ class OAuthClient:
 
     def authorize_token(self, token):
         oauth_request = oauth.OAuthRequest.from_token_and_callback(token=token, 
-                http_url=self.AUTHORIZATION_URL)
+                http_url=AUTHORIZATION_URL)
         print 'please paste the url in your webbrowser, complete the authorization then come back:'
         print oauth_request.to_url()
         line = raw_input()
-        print 'authorization was completed, continue'
+        print 'authorization was completed, press ANY KEY to continue'
  
-    def get_auth_token(self, method=None, uri=None):
+    def get_auth_header(self, method, uri, parameter={}):
+        if not uri.startswith(HOST):
+            uri = HOST + uri
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                token=self.token, http_url=uri)
+                token=self.token, http_method=method, http_url=uri, parameters=parameter)
         oauth_request.sign_request(signature_method, self.consumer, self.token)
-        return oauth_request.to_header()['Authorization']
+        return oauth_request.to_header()
  
     def access_resource(self, method, url, body=None):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
@@ -79,8 +81,9 @@ def test():
     client = OAuthClient('api.douban.com', 
             key='7f1494926beb1d527d3dbdb743c157f6',
             secret='50cd7b45a6859b36')
-    client.login()
-    res = client.access_resource('GET', '/test').read()
+    client.login(key='47c28e8f69497a61d747abae3bdc6f23',secret='231603d673b4e5c5')
+    res = client.access_resource('GET', 'http://api.douban.com/test?a=b&c=d').read()
+    print res
     assert res == 'OK'
 
 if __name__ == '__main__':

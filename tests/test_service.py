@@ -7,19 +7,18 @@ API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
 TOKEN_KEY='47c28e8f69497a61d747abae3bdc6f23'
 TOKEN_SECRET='231603d673b4e5c5'
-PREFIX=''
 
 class TestDoubanService:
     def __init__(self):
         self.client = douban.service.DoubanService(server=SERVER,
                     api_key=API_KEY,secret=SECRET)
-        self.client.ClientLogin(token_key=TOKEN_KEY,token_secret=TOKEN_SECRET)
+        self.client.ProgrammaticLogin(token_key=TOKEN_KEY,token_secret=TOKEN_SECRET)
     
     def setUp(self):
         pass
 
     def test_people(self):
-        people = self.client.GetPeople(PREFIX+'/people/1000001')
+        people = self.client.GetPeople('/people/1000001')
         assert people.title.text == "阿北"
 
     def test_search_people(self):
@@ -31,22 +30,17 @@ class TestDoubanService:
         assert len(feed.entry)
 
     def test_get_tag_feed(self):
-        uri = PREFIX+'/book/subject/1000001/tags'
+        uri = '/book/subject/1000001/tags'
         feed = self.client.GetTagFeed(uri)
         assert any(e.title.text == "第一" for e in feed.entry)
 
     def test_get_book(self):
-        uri = PREFIX+'/book/subject/1489401'
+        uri = '/book/subject/1489401'
         entry = self.client.GetBook(uri)
         assert entry.title.text == '安徒生童话'
 
-    def test_login(self):
-        uri = PREFIX+'/test'
-        r = self.client.Get(uri, converter=str)
-        assert r == 'OK'
-
     def test_review(self):
-        book_uri = PREFIX+'/book/subject/1489401'
+        book_uri = '/book/subject/1489401'
         subject = self.client.GetBook(book_uri)
         
         entry = self.client.CreateReview('good', 'Very Good'*5, subject, 4)
@@ -57,7 +51,7 @@ class TestDoubanService:
         assert entry.title.text == 'good'
         assert entry.rating.value == '4'
         
-        feed_uri = PREFIX+'/people/davies/reviews'
+        feed_uri = '/people/davies/reviews'
         feed = self.client.GetReviewFeed(feed_uri)
         n = int(feed.total_results.text)
         assert n >= 1
@@ -73,7 +67,7 @@ class TestDoubanService:
         
         
     def test_collection(self):
-        book_uri = PREFIX+'/book/subject/1489401'
+        book_uri = '/book/subject/1489401'
         subject = self.client.GetBook(book_uri)
         
         entry = self.client.AddCollection('wish', subject, tag='nice')

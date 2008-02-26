@@ -4,7 +4,6 @@ import time
 import random
 import urlparse
 import hmac
-import hashlib
 import base64
 
 VERSION = '1.0' # Hi Blaine!
@@ -23,7 +22,7 @@ def build_authenticate_header(realm=''):
 # url escape
 def escape(s):
     # escape '/' too
-    return urllib.quote(s, safe='')
+    return urllib.quote(s, safe='~')
 
 # util function: current timestamp
 # seconds since epoch (UTC)
@@ -139,16 +138,20 @@ class OAuthRequest(object):
     # return a string that consists of all the parameters that need to be signed
     def get_normalized_parameters(self):
         params = self.parameters
+        
+        param_str = urlparse.urlparse(self.http_url).query
+        params.update(OAuthRequest._split_url_string(param_str))
+        
         try:
             # exclude the signature if it exists
             del params['oauth_signature']
         except:
             pass
-        keys = params.keys()
-        # sort alphabetically
-        keys.sort()
+        key_values = params.items()
+        # sort lexicographically, first after key, then after value
+        key_values.sort()
         # combine key value pairs in string and escape
-        return escape('&'.join('%s=%s' % (str(k), params[k]) for k in keys))
+        return '&'.join('%s=%s' % (escape(str(k)), escape(str(v))) for k, v in key_values)
 
     # just uppercases the http method
     def get_normalized_http_method(self):
@@ -157,7 +160,7 @@ class OAuthRequest(object):
     # parses the url and rebuilds it to be scheme://host/path
     def get_normalized_http_url(self):
         parts = urlparse.urlparse(self.http_url)
-        url_string = '%s://%s%s' % (parts.scheme, parts.netloc, parts.path)
+        url_string = '%s://%s%s' % (parts[0], parts[1], parts[2]) # scheme, netloc, path
         return url_string
         
     # set the signature parameter to the result of build_signature
@@ -322,8 +325,8 @@ class OAuthServer(object):
         return consumer, token, parameters
 
     # authorize a request token
-    def authorize_token(self, token):
-        return self.data_store.authorize_request_token(token)
+    def authorize_token(self, token, user):
+        return self.data_store.authorize_request_token(token, user)
     
     # get the callback url
     def get_callback(self, oauth_request):
@@ -387,7 +390,7 @@ class OAuthServer(object):
         # attempt to construct the same signature
         built = signature_method.build_signature(oauth_request, consumer, token)
         if signature != built:
-            raise OAuthError('Invalid signature')
+            raise OAuthError('Signature does not match. Expected: %s Got: %s' % (built, signature))
 
     def _check_timestamp(self, timestamp):
         # verify that timestamp is recentish
@@ -455,7 +458,7 @@ class OAuthDataStore(object):
         # -> OAuthToken
         raise NotImplementedError
 
-    def authorize_request_token(self, oauth_token):
+    def authorize_request_token(self, oauth_token, user):
         # -> OAuthToken
         raise NotImplementedError
 
@@ -481,13 +484,18 @@ class OAuthSignatureMethod_HMAC_SHA1(OAuthSignatureMethod):
             escape(oauth_request.get_normalized_parameters()),
         )
 
-        key = '%s&' % consumer.secret
+        key = '%s&' % escape(consumer.secret)
         if token:
-            key += token.secret
+            key += escape(token.secret)
         raw = '&'.join(sig)
 
         # hmac object
-        hashed = hmac.new(key, raw, hashlib.sha1)
+        try:
+            import hashlib # 2.5
+            hashed = hmac.new(key, raw, hashlib.sha1)
+        except:
+            import sha # deprecated
+            hashed = hmac.new(key, raw, sha)
 
         # calculate the digest base 64
         return base64.b64encode(hashed.digest())

@@ -7,7 +7,8 @@ import douban.service
 
 # Please use your own api key instead. e.g. :
 #APIKEY = "23eeeb4347bdd26bfc6b7ee9a3b755dd"
-APIKEY = None
+APIKEY = ''
+SECRET = ''
 
 client = douban.service.DoubanService(api_key=APIKEY)
 feed = client.SearchMovie("Monty Python")
