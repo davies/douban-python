@@ -15,7 +15,6 @@ from douban.client import OAuthClient
 
 API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
-SERVER='api.douban.com'
 
 token = None
 secret = None

@@ -6,10 +6,11 @@ import oauth
 
 signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
 
-HOST = 'http://api.douban.com'
-REQUEST_TOKEN_URL = '/service/auth/request_token'
-ACCESS_TOKEN_URL = '/service/auth/access_token'
-AUTHORIZATION_URL = '/service/auth/authorize'
+API_HOST = 'http://api.douban.com'
+AUTH_HOST = 'http://frodo.douban.com'
+REQUEST_TOKEN_URL = AUTH_HOST+'/service/auth/request_token'
+ACCESS_TOKEN_URL = AUTH_HOST+'/service/auth/access_token'
+AUTHORIZATION_URL = AUTH_HOST+'/service/auth/authorize'
 
 class OAuthClient:
     def __init__(self, server='frodo.douban.com', key=None, secret=None):
@@ -47,7 +48,7 @@ class OAuthClient:
             return token, user_id
         except:
             print r
-            raise
+            raise Exception,str(r)
             return None,None
 
     def get_request_token(self):
@@ -75,8 +76,8 @@ class OAuthClient:
             return token.key, token.secret
  
     def get_auth_header(self, method, uri, parameter={}):
-        if not uri.startswith(HOST):
-            uri = HOST + uri
+        if not uri.startswith('http'):
+            uri = API_HOST + uri
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
                 token=self.token, http_method=method, http_url=uri, parameters=parameter)
         oauth_request.sign_request(signature_method, self.consumer, self.token)
