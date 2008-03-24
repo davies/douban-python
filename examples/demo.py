@@ -18,6 +18,7 @@ SECRET='50cd7b45a6859b36'
 
 token = None
 secret = None
+SERVER='api.douban.com'
 
 request_tokens = {}
 access_token = None
