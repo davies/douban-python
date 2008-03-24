@@ -13,7 +13,6 @@ except Exception:
 import douban.service
 from douban.client import OAuthClient
 
-SERVER='api.douban.com'
 API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
 
@@ -57,17 +56,18 @@ class collection(object):
         if not access_token and key in request_tokens:
             access_token = client.get_access_token(key, request_tokens[key])
             
-        
         if access_token:
             service = douban.service.DoubanService(server=SERVER, api_key=API_KEY, secret=SECRET)
             key,secret = access_token
             if service.ProgrammaticLogin(key, secret):
                 movie = service.GetMovie(sid)
-                entry = service.AddCollection('wish', movie)
+                entry = service.AddCollection('wish', movie, tag=['test'])
                 if entry:
-                    print 'OK'
+                    print 'add to collection successfully'
+                else:
+                    print 'add to collection failed'
             else:
-                print 'fetch access token failed'
+                print 'login failed'
         else:
             client = OAuthClient(SERVER, API_KEY, SECRET) 
             key, secret = client.get_request_token()

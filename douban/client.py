@@ -12,7 +12,7 @@ ACCESS_TOKEN_URL = HOST+'/auth/access_token'
 AUTHORIZATION_URL = 'http://frodo.douban.com/service/api/auth/authorize'
 
 class OAuthClient:
-    def __init__(self, server, key=None, secret=None):
+    def __init__(self, server='api.douban.com', key=None, secret=None):
         self.server = server
         self.consumer = oauth.OAuthConsumer(key, secret)
         self.token = None
@@ -22,18 +22,15 @@ class OAuthClient:
         if key and secret:
             self.token = oauth.OAuthToken(key, secret)
             return True
+
+        key,secret = self.get_request_token()
+        url = self.get_authorization_url(key, secret)
+        print 'please paste the url in your webbrowser, complete the authorization then come back:'
+        print url
+        line = raw_input()
         
-#       url = self.authorize_url(callback)
-#        if redirect and callable(redirect):
-#            redirect(url)
-#            return True
-#        else:
-#            print 'please paste the url in your webbrowser, complete the authorization then come back:'
-#            print url
-#            line = raw_input()
-#        
-#        #print self.token, self.user_id
-#        return self.token
+        key, secret = self.get_access_token(key, secret)
+        return self.login(key, secret)
 
     def fetch_token(self, oauth_request):
         connection = httplib.HTTPConnection("%s:%d" % (self.server, 80))
