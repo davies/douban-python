@@ -22,7 +22,6 @@ class OAuthClient:
     def login(self, key=None, secret=None):
         if key and secret:
             self.token = oauth.OAuthToken(key, secret)
-            print key,secret
             return True
 
         key,secret = self.get_request_token()

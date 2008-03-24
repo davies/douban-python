@@ -108,36 +108,15 @@ class collection(object):
             print 'no sid'
             return 
         key = web.input().get('token','')
-        client = OAuthClient(key=API_KEY, secret=SECRET) 
-        
+        client = OAuthClient(key=API_KEY, secret=SECRET)
+
         global access_token
-        if not access_token and key in request_tokens:
-            access_token = client.get_access_token(key, request_tokens[key])
-            
-        if access_token:
-            service = douban.service.DoubanService(api_key=API_KEY, secret=SECRET)
-            key,secret = access_token
-            html_header()
-            search_panel()
-            print '<h2>你希望收藏电影: %s</h2>' % (movie.title.text)
-            print '<div class="obss" style="margin-top:20px">'
-            print '<dl class="obs"><dt>'
-            print '<a href="%s" title="%s"><img src="%s" class="m_sub_img"/></a>' % (movie.GetAlternateLink().href, movie.title.text, movie.link[2].href)
-            print '</dt><dd>'
-            print '<a href="%s">%s</a>' % (movie.GetAlternateLink().href, movie.title.text)
-            print '</dd>'
-            print '</dl>'
-            if service.ProgrammaticLogin(key, secret):
-                movie = service.GetMovie(sid)
-                entry = service.AddCollection('wish', movie, tag=['test'])
-                if entry:
-                    print '<span>已添加到你的收藏</span>'
-                else:
-                    print '<span>添加收藏失败</span>'
-            else:
-                print '<span>添加收藏失败，可能你因为你没有授权这个应用访问你在豆瓣的数据</span>'
-            print '</div>'
-            html_footer()
+        if key in request_tokens:
+            if not access_token:
+                try:
+                    access_token = client.get_access_token(key, request_tokens[key])         
+                except Exception:
+                    pass
         else:
             client = OAuthClient(key=API_KEY, secret=SECRET) 
             key, secret = client.get_request_token()
@@ -146,6 +125,31 @@ class collection(object):
             url = client.get_authorization_url(key, secret, 
                     callback='http://localhost:8080/collection?sid=%s&token=%s' %(sid,key))
             web.tempredirect(url)
+
+        service = douban.service.DoubanService(api_key=API_KEY, secret=SECRET)
+        movie = service.GetMovie(sid)
+        html_header()
+        search_panel()
+        print '<h2>你希望收藏电影: %s</h2>' % (movie.title.text)
+        print '<div class="obss" style="margin-top:20px">'
+        print '<dl class="obs"><dt>'
+        print '<a href="%s" title="%s"><img src="%s" class="m_sub_img"/></a>' % (movie.GetAlternateLink().href, movie.title.text, movie.link[2].href)
+        print '</dt><dd>'
+        print '<a href="%s">%s</a>' % (movie.GetAlternateLink().href, movie.title.text)
+        print '</dd>'
+        print '</dl>'
+        if access_token:
+            key,secret = access_token
+            if service.ProgrammaticLogin(key, secret):
+                entry = service.AddCollection('wish', movie, tag=['test'])
+                if entry:
+                    print '<span>已添加到你的收藏</span>'
+                else:
+                    print '<span>添加收藏失败</span>'
+        else:
+            print '<span>添加收藏失败，可能你因为你没有授权这个应用访问你在豆瓣的数据</span>'
+        print '</div>'
+        html_footer()
 
 urls = (
     '/', 'index',
