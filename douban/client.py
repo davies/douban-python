@@ -23,19 +23,17 @@ class OAuthClient:
             self.token = oauth.OAuthToken(key, secret)
             return True
         
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                http_url=REQUEST_TOKEN_URL)
-        oauth_request.sign_request(signature_method, self.consumer, None)
-        token,_ = self.fetch_token(oauth_request)
-
-        self.authorize_token(token)
-        
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                token=token, http_url=ACCESS_TOKEN_URL)
-        oauth_request.sign_request(signature_method, self.consumer, token)
-        self.token, self.user_id = self.fetch_token(oauth_request)
-        print self.token, self.user_id
-        return self.token is not None
+#       url = self.authorize_url(callback)
+#        if redirect and callable(redirect):
+#            redirect(url)
+#            return True
+#        else:
+#            print 'please paste the url in your webbrowser, complete the authorization then come back:'
+#            print url
+#            line = raw_input()
+#        
+#        #print self.token, self.user_id
+#        return self.token
 
     def fetch_token(self, oauth_request):
         connection = httplib.HTTPConnection("%s:%d" % (self.server, 80))
@@ -52,12 +50,29 @@ class OAuthClient:
         except:
             return None,None
 
-    def authorize_token(self, token):
+    def get_request_token(self):
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
+                        http_url=REQUEST_TOKEN_URL)
+        oauth_request.sign_request(signature_method, self.consumer, None)
+        token,_ = self.fetch_token(oauth_request)
+        return token.key, token.secret
+
+    def get_authorization_url(self, key, secret, callback=None):
+        token = oauth.OAuthToken(key, secret)
         oauth_request = oauth.OAuthRequest.from_token_and_callback(token=token, 
-                http_url=AUTHORIZATION_URL)
-        print 'please paste the url in your webbrowser, complete the authorization then come back:'
-        print oauth_request.to_url()
-        line = raw_input()
+                http_url=AUTHORIZATION_URL, callback=callback)
+        return oauth_request.to_url()
+ 
+    def get_access_token(self, key=None, secret=None, token=None):
+        if key and secret:
+            token = oauth.OAuthToken(key, secret)
+        assert token is not None
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
+                token=token, http_url=ACCESS_TOKEN_URL)
+        oauth_request.sign_request(signature_method, self.consumer, token)
+        token, user_id = self.fetch_token(oauth_request)
+        if token:
+            return token.key, token.secret
  
     def get_auth_header(self, method, uri, parameter={}):
         if not uri.startswith(HOST):

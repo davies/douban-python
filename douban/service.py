@@ -15,8 +15,11 @@ class DoubanService(gdata.service.GDataService):
         gdata.service.GDataService.__init__(self, service='douban', source=source,
                 server=server, additional_headers=additional_headers)
 
+    def GetAuthorizationURL(self, callback=None):
+        return self.client.get_authorization_url(callback)
+
     def ProgrammaticLogin(self, token_key=None, token_secret=None):
-        self.client.login(token_key, token_secret)
+        return self.client.login(token_key, token_secret)
         # PLAINTEXT Only
         #self.additional_headers['Authorization'] = self.client.get_auth_token()
 
