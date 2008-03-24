@@ -47,23 +47,23 @@ class TestDoubanService:
         assert entry.title.text == 'good'
         assert entry.rating.value == '4'
         
-        entry = self.client.GetReview(entry.GetSelfLink().href)
-        assert entry.title.text == 'good'
-        assert entry.rating.value == '4'
-        
-        feed_uri = '/people/davies/reviews'
-        feed = self.client.GetReviewFeed(feed_uri)
-        n = int(feed.total_results.text)
-        assert n >= 1
-        
-        entry = self.client.UpdateReview(entry, 'good2', 'Very Nice'*5, 5)
-        print entry.title.text
-        assert entry.title.text == 'good2'
-        assert entry.rating.value == '5'
-        
-        assert self.client.DeleteReview(feed.entry[1])
-        feed = self.client.GetReviewFeed(feed_uri)
-        assert n-1 == int(feed.total_results.text)
+#        entry = self.client.GetReview(entry.GetSelfLink().href)
+#        assert entry.title.text == 'good'
+#        assert entry.rating.value == '4'
+#        
+#        feed_uri = '/people/davies/reviews'
+#        feed = self.client.GetReviewFeed(feed_uri)
+#        n = int(feed.total_results.text)
+#        assert n >= 1
+#        
+#        entry = self.client.UpdateReview(entry, 'good2', 'Very Nice'*5, 5)
+#        print entry.title.text
+#        assert entry.title.text == 'good2'
+#        assert entry.rating.value == '5'
+#        
+#        assert self.client.DeleteReview(feed.entry[1])
+#        feed = self.client.GetReviewFeed(feed_uri)
+#        assert n-1 == int(feed.total_results.text)
         
         
     def test_collection(self):

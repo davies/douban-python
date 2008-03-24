@@ -86,8 +86,7 @@ class index(object):
 class search(object):
     def GET(self):
         q = web.input().get('q','')
-        client = douban.service.DoubanService(server=SERVER,
-                    api_key=API_KEY,secret=SECRET)
+        client = douban.service.DoubanService(api_key=API_KEY,secret=SECRET)
         feed = client.SearchMovie(q)
         html_header()
         search_panel(q)
@@ -110,14 +109,14 @@ class collection(object):
             print 'no sid'
             return 
         key = web.input().get('token','')
-        client = OAuthClient(SERVER, API_KEY, SECRET) 
+        client = OAuthClient(key=API_KEY, secret=SECRET) 
         
         global access_token
         if not access_token and key in request_tokens:
             access_token = client.get_access_token(key, request_tokens[key])
             
         if access_token:
-            service = douban.service.DoubanService(server=SERVER, api_key=API_KEY, secret=SECRET)
+            service = douban.service.DoubanService(api_key=API_KEY, secret=SECRET)
             key,secret = access_token
             html_header()
             search_panel()
@@ -141,7 +140,7 @@ class collection(object):
             print '</div>'
             html_footer()
         else:
-            client = OAuthClient(SERVER, API_KEY, SECRET) 
+            client = OAuthClient(key=API_KEY, secret=SECRET) 
             key, secret = client.get_request_token()
             request_tokens[key] = secret
             
