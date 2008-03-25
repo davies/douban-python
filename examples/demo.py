@@ -16,15 +16,13 @@ except ImportError:
     print 'please install douban-python'
     sys.exit(0)
 
-HOST = 'http://localhost:8080'
-API_KEY='7f1494926beb1d527d3dbdb743c157f6'
-SECRET='50cd7b45a6859b36'
-
-token = None
-secret = None
+HOST = 'http://www.douban.com'
+PREFIX = '/service/apidemo' 
+API_KEY=''
+SECRET=''
 
 request_tokens = {}
-access_token = None
+access_tokens = {}
 
 def html_header():
     print """
@@ -74,10 +72,11 @@ def html_footer():
 def search_panel(q = "monty python"):
     print """
             <h2>搜索电影并添加收藏...</h2>
-            <form action="/search" method="GET">
+            <form action="%s/search" method="GET">
             <input name="q" width="30" value="%s">
             <input type="submit" value="搜索电影">
-            </form>""" % (q)
+            </form>""" % (PREFIX, q)
+
 
 class index(object):
     def GET(self):
@@ -89,20 +88,21 @@ class index(object):
 class search(object):
     def GET(self):
         q = web.input().get('q','')
-        service = DoubanService(api_key=API_KEY,secret=SECRET)
-        feed = service.SearchMovie(q)
         html_header()
         search_panel(q)
-        print '<div class="obss" style="margin-top:20px">'
-        for movie in feed.entry:
-            print '<dl class="obs"><dt>'
-            print '<div class="gact"><a href="/collection?sid=%s">想看</a></div>' % (movie.id.text)
-            print '<a href="%s" title="%s"><img src="%s" class="m_sub_img"/></a>' % (movie.GetAlternateLink().href, movie.title.text, ((len(movie.link) >= 3) and movie.link[2].href) or '')
-            print '</dt><dd>'
-            print '<a href="%s">%s</a>' % (movie.GetAlternateLink().href, movie.title.text)
-            print '</dd>'
-            print '</dl>'
-        print '</div>'
+        if q:
+            service = DoubanService(api_key=API_KEY,secret=SECRET)
+            feed = service.SearchMovie(q)
+            print '<div class="obss" style="margin-top:20px">'
+            for movie in feed.entry:
+                print '<dl class="obs"><dt>'
+                print '<div class="gact"><a href="%s/collection?sid=%s">想看</a></div>' % (PREFIX, movie.id.text)
+                print '<a href="%s" title="%s"><img src="%s" class="m_sub_img"/></a>' % (movie.GetAlternateLink().href, movie.title.text, ((len(movie.link) >= 3) and movie.link[2].href) or '')
+                print '</dt><dd>'
+                print '<a href="%s">%s</a>' % (movie.GetAlternateLink().href, movie.title.text)
+                print '</dd>'
+                print '</dl>'
+            print '</div>'
         html_footer()
 
 class collection(object):
@@ -113,13 +113,22 @@ class collection(object):
             return 
         
         client = OAuthClient(key=API_KEY, secret=SECRET)
+        cookies = web.cookies()
+        access_key = cookies.get('access_key')
+        access_secret = access_tokens.get(access_key)
 
-        global access_token
-        if not access_token:
-            key = web.input().get('oauth_token','')
-            if key in request_tokens:
+        if not access_key or not access_secret:
+            request_key = web.input().get('oauth_token','')
+            request_secret = request_tokens.get(request_key)
+            if request_key and request_secret:
                 try:
-                    access_token = client.get_access_token(key, request_tokens[key])         
+                    access_key, access_secret = \
+                        client.get_access_token(request_key, request_secret) 
+                    if access_key and access_secret:
+                        # store user access key in cookie, 
+                        # not accessable by other people
+                        web.setcookie('access_key', access_key)
+                        access_tokens[access_key] = access_secret
                 except Exception:
                     access_token = None
                     print '获取用户授权失败'
@@ -127,10 +136,14 @@ class collection(object):
             else:
                 client = OAuthClient(key=API_KEY, secret=SECRET) 
                 key, secret = client.get_request_token()
-                request_tokens[key] = secret
-                url = client.get_authorization_url(key, secret, callback=HOST+'/collection?sid='+sid)
-                web.tempredirect(url)
-                return
+                if key and secret:
+                    request_tokens[key] = secret
+                    url = client.get_authorization_url(key, secret, callback=HOST+PREFIX+'/collection?sid='+sid)
+                    web.tempredirect(url)
+                    return
+                else:
+                    print '获取 Request Token 失败'
+                    return 
 
         service = DoubanService(api_key=API_KEY, secret=SECRET)
         movie = service.GetMovie(sid)
@@ -144,23 +157,27 @@ class collection(object):
         print '<a href="%s">%s</a>' % (movie.GetAlternateLink().href, movie.title.text)
         print '</dd>'
         print '</dl>'
-        if access_token:
-            key,secret = access_token
-            if service.ProgrammaticLogin(key, secret):
-                entry = service.AddCollection('wish', movie, tag=['test'])
-                if entry:
-                    print '<span>已添加到你的收藏</span>'
-                else:
-                    print '<span>添加收藏失败</span>'
+        if access_key and access_secret:
+            if service.ProgrammaticLogin(access_key, access_secret):
+                try:
+                    entry = service.AddCollection('wish', movie, tag=['test'])
+                    if entry:
+                        print '<span>已添加到你的收藏</span>'
+                    else:
+                        print '<span>添加收藏失败</span>'
+                except Exception:
+                    print '<span>添加收藏失败, 授权失效</span>'
+                    del access_tokens[access_key]
+                    web.setcookie('access_key', '', 0)
         else:
-            print '<span>添加收藏失败，可能你因为你没有授权这个应用访问你在豆瓣的数据</span>'
+            print '<span>无法添加收藏，可能你因为你没有授权这个应用访问你在豆瓣的数据</span>'
         print '</div>'
         html_footer()
 
 urls = (
-    '/', 'index',
-    '/search', 'search',
-    '/collection', 'collection',
+    PREFIX+'/', 'index',
+    PREFIX+'/search', 'search',
+    PREFIX+'/collection', 'collection',
 )
     
 if __name__ == '__main__':
