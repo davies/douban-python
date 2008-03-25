@@ -17,7 +17,6 @@ class OAuthClient:
         self.server = server
         self.consumer = oauth.OAuthConsumer(key, secret)
         self.token = None
-        self.user_id = None
 
     def login(self, key=None, secret=None):
         if key and secret:
@@ -25,13 +24,21 @@ class OAuthClient:
             return True
 
         key,secret = self.get_request_token()
+        if not key:
+            print 'get request token failed'
+            return 
         url = self.get_authorization_url(key, secret)
         print 'please paste the url in your webbrowser, complete the authorization then come back:'
         print url
         line = raw_input()
         
         key, secret = self.get_access_token(key, secret)
-        return self.login(key, secret)
+        print key, secret
+        if key:
+            return self.login(key, secret)
+        else:
+            print 'get access token failed'
+            return False
 
     def fetch_token(self, oauth_request):
         connection = httplib.HTTPConnection("%s:%d" % (self.server, 80))
@@ -42,20 +49,17 @@ class OAuthClient:
         try:
             token = oauth.OAuthToken.from_string(r)
             params = cgi.parse_qs(r, keep_blank_values=False)
-            user_id = params.get('douban_user_id')
-            user_id = user_id and user_id[0]
-            return token, user_id
+            user_id = params.get('douban_user_id',[None])[0]
+            return token.key,token.secret, user_id
         except:
             print r
-            raise Exception,str(r)
-            return None,None
+            return None,None,None
 
     def get_request_token(self):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
                         http_url=REQUEST_TOKEN_URL)
         oauth_request.sign_request(signature_method, self.consumer, None)
-        token,_ = self.fetch_token(oauth_request)
-        return token.key, token.secret
+        return self.fetch_token(oauth_request)[:2]
 
     def get_authorization_url(self, key, secret, callback=None):
         token = oauth.OAuthToken(key, secret)
@@ -70,17 +74,18 @@ class OAuthClient:
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
                 token=token, http_url=ACCESS_TOKEN_URL)
         oauth_request.sign_request(signature_method, self.consumer, token)
-        token, user_id = self.fetch_token(oauth_request)
-        if token:
-            return token.key, token.secret
+        return self.fetch_token(oauth_request)[:2]
  
     def get_auth_header(self, method, uri, parameter={}):
-        if not uri.startswith('http'):
-            uri = API_HOST + uri
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
-                token=self.token, http_method=method, http_url=uri, parameters=parameter)
-        oauth_request.sign_request(signature_method, self.consumer, self.token)
-        return oauth_request.to_header()
+        if self.token:
+            if not uri.startswith('http'):
+                uri = API_HOST + uri
+            oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
+                    token=self.token, http_method=method, http_url=uri, parameters=parameter)
+            oauth_request.sign_request(signature_method, self.consumer, self.token)
+            return oauth_request.to_header()
+        else:
+            return {}
  
     def access_resource(self, method, url, body=None):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
@@ -94,10 +99,11 @@ class OAuthClient:
             headers=headers)
         return connection.getresponse()
 
+
 def test():
-    client = OAuthClient('api.douban.com', 
-            key='7f1494926beb1d527d3dbdb743c157f6',
-            secret='50cd7b45a6859b36')
+    API_KEY = '7f1494926beb1d527d3dbdb743c157f6' 
+    SECRET = '50cd7b45a6859b36'
+    client = OAuthClient(key=API_KEY, secret=SECRET)
     client.login()
     res = client.access_resource('GET', 'http://api.douban.com/test?a=b&c=d').read()
     print res

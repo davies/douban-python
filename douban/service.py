@@ -11,7 +11,7 @@ class DoubanService(gdata.service.GDataService):
             source='douban-python', server='api.douban.com', 
             additional_headers=None):
         self.api_key = api_key
-        self.client = client.OAuthClient(server, key=api_key, secret=secret)
+        self.client = client.OAuthClient(key=api_key, secret=secret)
         gdata.service.GDataService.__init__(self, service='douban', source=source,
                 server=server, additional_headers=additional_headers)
 
@@ -20,17 +20,17 @@ class DoubanService(gdata.service.GDataService):
 
     def ProgrammaticLogin(self, token_key=None, token_secret=None):
         return self.client.login(token_key, token_secret)
-        # PLAINTEXT Only
-        #self.additional_headers['Authorization'] = self.client.get_auth_token()
 
     def Get(self, uri, extra_headers={}, *args, **kwargs):
-        extra_headers.update(self.client.get_auth_header('GET', uri))
-#        if self.api_key:
-#            param = urllib.urlencode([('apikey', self.api_key)])
-#            if '?' in uri:
-#                uri += '&' + param
-#            else:
-#                uri += '?' + param
+        auth_header = self.client.get_auth_header('GET', uri)
+        if auth_header:
+            extra_headers.update(auth_header)
+        elif self.api_key:
+            param = urllib.urlencode([('apikey', self.api_key)])
+            if '?' in uri:
+                uri += '&' + param
+            else:
+                uri += '?' + param
         return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)
 
     def Post(self, data, uri, extra_headers={}, url_params=None, *args, **kwargs):

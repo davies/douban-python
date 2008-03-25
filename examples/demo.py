@@ -5,14 +5,18 @@ import sys
 
 try:
     import web
-    render = web.template.render('examples/templates/')
 except Exception:
     print 'please install webpy first'
     sys.exit(0)
 
-import douban.service
-from douban.client import OAuthClient
+try:
+    from douban.service import DoubanService
+    from douban.client import OAuthClient
+except ImportError:
+    print 'please install douban-python'
+    sys.exit(0)
 
+HOST = 'http://localhost:8080'
 API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
 
@@ -85,8 +89,8 @@ class index(object):
 class search(object):
     def GET(self):
         q = web.input().get('q','')
-        client = douban.service.DoubanService(api_key=API_KEY,secret=SECRET)
-        feed = client.SearchMovie(q)
+        service = DoubanService(api_key=API_KEY,secret=SECRET)
+        feed = service.SearchMovie(q)
         html_header()
         search_panel(q)
         print '<div class="obss" style="margin-top:20px">'
@@ -107,26 +111,28 @@ class collection(object):
         if not sid:
             print 'no sid'
             return 
-        key = web.input().get('token','')
+        
         client = OAuthClient(key=API_KEY, secret=SECRET)
 
         global access_token
-        if key in request_tokens:
-            if not access_token:
+        if not access_token:
+            key = web.input().get('oauth_token','')
+            if key in request_tokens:
                 try:
                     access_token = client.get_access_token(key, request_tokens[key])         
                 except Exception:
-                    pass
-        else:
-            client = OAuthClient(key=API_KEY, secret=SECRET) 
-            key, secret = client.get_request_token()
-            request_tokens[key] = secret
-            
-            url = client.get_authorization_url(key, secret, 
-                    callback='http://localhost:8080/collection?sid=%s&token=%s' %(sid,key))
-            web.tempredirect(url)
+                    access_token = None
+                    print '获取用户授权失败'
+                    return 
+            else:
+                client = OAuthClient(key=API_KEY, secret=SECRET) 
+                key, secret = client.get_request_token()
+                request_tokens[key] = secret
+                url = client.get_authorization_url(key, secret, callback=HOST+'/collection?sid='+sid)
+                web.tempredirect(url)
+                return
 
-        service = douban.service.DoubanService(api_key=API_KEY, secret=SECRET)
+        service = DoubanService(api_key=API_KEY, secret=SECRET)
         movie = service.GetMovie(sid)
         html_header()
         search_panel()

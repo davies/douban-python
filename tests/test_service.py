@@ -5,8 +5,8 @@ import douban.service
 SERVER='api.douban.com'
 API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
-TOKEN_KEY='f60a29ed1da4c608e21e7dc758ee5218'
-TOKEN_SECRET='650b4d78aea291ca'
+TOKEN_KEY='4399370610fa7babcacba51232ef7301'
+TOKEN_SECRET='c6a759474a9dbe48'
 
 class TestDoubanService:
     def __init__(self):
