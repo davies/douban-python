@@ -13,3 +13,8 @@ def test_review_entry():
     assert entry.title.text == "终点之后"
     assert entry.subject.title.text == "Cowboy Bebop"
 
+def test_collection_feed():
+    feed = douban.CollectionFeedFromString(testdata.TEST_COLLECTION_FEED)
+    assert len(feed.entry) == 3
+    
+    
