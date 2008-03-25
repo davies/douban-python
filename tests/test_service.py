@@ -5,8 +5,8 @@ import douban.service
 SERVER='api.douban.com'
 API_KEY='7f1494926beb1d527d3dbdb743c157f6'
 SECRET='50cd7b45a6859b36'
-TOKEN_KEY='4399370610fa7babcacba51232ef7301'
-TOKEN_SECRET='c6a759474a9dbe48'
+TOKEN_KEY='831d78877da7dcf88958699678f796e8'
+TOKEN_SECRET='1e71de93da1b48cc'
 
 class TestDoubanService:
     def __init__(self):
@@ -47,25 +47,25 @@ class TestDoubanService:
         assert entry.title.text == 'good'
         assert entry.rating.value == '4'
         
-#        entry = self.client.GetReview(entry.GetSelfLink().href)
-#        assert entry.title.text == 'good'
-#        assert entry.rating.value == '4'
-#        
-#        feed_uri = '/people/davies/reviews'
-#        feed = self.client.GetReviewFeed(feed_uri)
-#        n = int(feed.total_results.text)
-#        assert n >= 1
-#        
-#        entry = self.client.UpdateReview(entry, 'good2', 'Very Nice'*5, 5)
-#        print entry.title.text
-#        assert entry.title.text == 'good2'
-#        assert entry.rating.value == '5'
-#        
-#        assert self.client.DeleteReview(feed.entry[1])
-#        feed = self.client.GetReviewFeed(feed_uri)
-#        assert n-1 == int(feed.total_results.text)
+        entry = self.client.GetReview(entry.GetSelfLink().href)
+        assert entry.title.text == 'good'
+        assert entry.rating.value == '4'
         
+        feed_uri = '/people/davies/reviews'
+        feed = self.client.GetReviewFeed(feed_uri)
+        n = int(feed.total_results.text)
+        assert n >= 1
         
+        entry = self.client.UpdateReview(entry, 'good2', 'Very Nice'*5, 5)
+        print entry.title.text
+        assert entry.title.text == 'good2'
+        assert entry.rating.value == '5'
+        
+        assert self.client.DeleteReview(feed.entry[1])
+        feed = self.client.GetReviewFeed(feed_uri)
+        assert n-1 == int(feed.total_results.text)
+        
+
     def test_collection(self):
         book_uri = '/book/subject/1489401'
         subject = self.client.GetBook(book_uri)
