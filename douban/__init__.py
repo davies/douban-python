@@ -7,6 +7,12 @@ def _t(v):
     if v is not None:
         return str(v)
 
+def _decode(v):
+    if v is not None:
+        if isinstance(v, unicode) == False:
+            return v.decode('utf-8')
+        return v
+
 class Location(atom.AtomBase):
     _tag = 'location'
     _namespace = DOUBAN_NAMESPACE
@@ -69,7 +75,7 @@ class Tag(atom.AtomBase):
     
     def __init__(self, name=None, count=None, **kwargs):
         atom.AtomBase.__init__(self, **kwargs)
-        self.name = name
+        self.name = _decode(name)
         self.count = _t(count)
 
 

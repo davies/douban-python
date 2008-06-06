@@ -172,6 +172,8 @@ class DoubanService(gdata.service.GDataService):
             if isinstance(tag, (str,unicode)):
                 tag = filter(None, tag.split(' '))
             entry.tags = [douban.Tag(name=t) for t in tag]
+        else:
+            entry.tags = [douban.Tag(name=t.name) for t in entry.tags]
         
         uri = entry.GetSelfLink().href  
         return self.Put(entry, uri, converter=douban.CollectionEntryFromString)
