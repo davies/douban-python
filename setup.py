@@ -8,8 +8,8 @@ setup(
         author = "Qiangning Hong",
         author_email = "hongqn@gmail.com",
         url = "http://www.douban.com/service/apidoc/",
-        install_requires = ['setuptools', 'gdata.py'],
+        install_requires = ['setuptools', 'gdata.py>=1.1.1'],
         tests_require = ['nose'],
         packages = find_packages(),
-        test_suite = 'nose.collector',
+        #test_suite = 'nose.collector',
 )

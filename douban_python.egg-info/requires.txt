@@ -1,2 +1,2 @@
 setuptools
-gdata.py
+gdata.py>=1.1.1

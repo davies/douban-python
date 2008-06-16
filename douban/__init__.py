@@ -75,7 +75,7 @@ class Tag(atom.AtomBase):
     
     def __init__(self, name=None, count=None, **kwargs):
         atom.AtomBase.__init__(self, **kwargs)
-        self.name = _decode(name)
+        self.name = name
         self.count = _t(count)
 
 
