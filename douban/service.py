@@ -33,17 +33,23 @@ class DoubanService(gdata.service.GDataService):
                 uri += '?' + param
         return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)
 
-    def Post(self, data, uri, extra_headers={}, url_params=None, *args, **kwargs):
+    def Post(self, data, uri, extra_headers=None, url_params=None, *args, **kwargs):
+        if extra_headers is None:
+            extra_headers = {}
         extra_headers.update(self.client.get_auth_header('POST', uri, url_params))
         return gdata.service.GDataService.Post(self, data, uri, 
                 extra_headers, url_params, *args, **kwargs)
     
-    def Put(self, data, uri, extra_headers={}, url_params=None, *args, **kwargs):
+    def Put(self, data, uri, extra_headers=None, url_params=None, *args, **kwargs):
+        if extra_headers is None:
+            extra_headers = {}
         extra_headers.update(self.client.get_auth_header('PUT', uri, url_params))
         return gdata.service.GDataService.Put(self, data, uri, 
                 extra_headers, url_params, *args, **kwargs)
 
-    def Delete(self, uri, extra_headers={}, url_params=None, *args, **kwargs):
+    def Delete(self, uri, extra_headers=None, url_params=None, *args, **kwargs):
+        if extra_headers is None:
+            extra_headers = {}
         extra_headers.update(self.client.get_auth_header('DELETE', uri, url_params))
         return gdata.service.GDataService.Delete(self, uri, extra_headers, url_params, *args, **kwargs)
 
