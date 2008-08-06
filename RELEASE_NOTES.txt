@@ -1,0 +1,10 @@
+=== 0.2 ===
+August 6, 2008 (revision 26)
+
+- Added GetAuthorizedUID method to DoubanService class, which can help to get current authorized user.
+- Added db:uid for PeopleEntry class, which stands for username.
+- Added GetFriends and GetContacts method to DoubanService.
+- Added GetCollection method to DoubanService.
+- Changed Collection related url from /people/{userID}/collection/{cid}  to  /collection/{cid} 
+- Added GetCollectionLink method to Subject class.
+- Added another parameter "orderby" to GetReviewFeed method. 
