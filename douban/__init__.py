@@ -23,6 +23,15 @@ class Location(atom.AtomBase):
         atom.AtomBase.__init__(self, text=loc, **kwargs)
 
 
+class Uid(atom.AtomBase):
+    _tag = 'uid'
+    _namespace = DOUBAN_NAMESPACE
+    _children = atom.AtomBase._children.copy()
+    _attributes = atom.AtomBase._attributes.copy()
+    
+    def __init__(self, loc=None, **kwargs):
+        atom.AtomBase.__init__(self, text=loc, **kwargs)
+
 class Rating(atom.AtomBase):
     """As gdata.py has not defined this element, we do this here.
     
@@ -107,6 +116,7 @@ class PeopleEntry(gdata.GDataEntry):
     _children = gdata.GDataEntry._children.copy()
     _attributes = gdata.GDataEntry._attributes.copy()
     _children['{%s}location' % (DOUBAN_NAMESPACE)] = ('location', Location)
+    _children['{%s}uid' % (DOUBAN_NAMESPACE)] = ('uid', Uid)
 
     def __init__(self, location=None, **kwargs):
         gdata.GDataEntry.__init__(self, **kwargs)
@@ -147,8 +157,12 @@ class Subject(SubjectEntry):
     """In some places we use <db:subject> to represent a subject entry."""
     _tag = 'subject'
     _namespace = DOUBAN_NAMESPACE
-
-
+ 
+    def GetCollectionLink(self):
+        for a_link in self.link:
+            if a_link.rel == 'collection':
+		return a_link	
+ 
 class BookEntry(SubjectEntry):
     pass
 

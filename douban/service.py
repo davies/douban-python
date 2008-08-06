@@ -63,6 +63,15 @@ class DoubanService(gdata.service.GDataService):
         query = Query('/people/', text_query, start_index=start_index,
                 max_results=max_results)
         return self.GetPeopleFeed(query.ToUri())
+    
+    def GetFriends(self, uri):
+	return self.Get(uri, converter=douban.PeopleFeedFromString)
+
+    def GetContacts(self, uri):
+    	return self.Get(uri, converter=douban.PeopleFeedFromString)
+
+    def GetAuthorizedUID(self, uri):
+	return self.Get(urllib.quote(uri), converter=douban.PeopleEntryFromString)
 
     def GetBook(self, uri):
         return self.Get(uri, converter=douban.BookEntryFromString)
@@ -115,8 +124,10 @@ class DoubanService(gdata.service.GDataService):
     def GetReview(self, uri):
         return self.Get(uri, converter=douban.ReviewEntryFromString)
 
-    def GetReviewFeed(self, uri):
-        return self.Get(uri, converter=douban.ReviewFeedFromString)
+    def GetReviewFeed(self, uri, orderby = 'score'):
+	query = Query(uri, text_query=None, 
+		start_index=None, max_results=None, orderby=orderby)
+        return self.Get(query.ToUri(), converter=douban.ReviewFeedFromString)
 
     def CreateReview(self, title, content, subject, rating=None):
         subject = douban.Subject(atom_id=subject.id)
@@ -151,7 +162,7 @@ class DoubanService(gdata.service.GDataService):
         return self.Get(uri, converter=douban.CollectionFeedFromString)
 
     def GetMyCollection(self):
-        return self.Get('/people/0/collection', 
+        return self.Get(urllib.quote('/people/@me/collection'), 
             converter=douban.CollectionFeedFromString)
 
     def AddCollection(self, status, subject, rating=None, tag=[], private=False):
@@ -164,7 +175,7 @@ class DoubanService(gdata.service.GDataService):
             tag = filter(None, tag.split(' '))
         entry.tags = [douban.Tag(name=t) for t in tag]
         
-        return self.Post(entry, '/people/0/collection', 
+        return self.Post(entry, '/collection', 
                 converter=douban.CollectionEntryFromString)
 
     def UpdateCollection(self, entry, status, tag=[], rating=None, private=False):

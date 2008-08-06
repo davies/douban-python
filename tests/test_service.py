@@ -1,13 +1,14 @@
 # encoding: UTF-8
 
 import douban.service
+import urllib
 
 SERVER='api.douban.com'
 # for user apitest
-API_KEY='b15d572d2689de5014180587739d9af0'
-SECRET='20d35fcbd52445d1'
-TOKEN_KEY='37b6cf391d702a4aa7246dab58507ede'
-TOKEN_SECRET='c22ecfea3ec593a8'
+API_KEY=''
+SECRET=''
+TOKEN_KEY=''
+TOKEN_SECRET=''
 
 class TestDoubanService:
     def __init__(self):
@@ -20,6 +21,7 @@ class TestDoubanService:
 
     def test_people(self):
         people = self.client.GetPeople('/people/1000001')
+	assert people.uid.text == 'ahbei'
         assert people.title.text == "阿北"
         assert people.location.text == "北京"
         assert people.GetSelfLink().href == "http://api.douban.com/people/1000001"
@@ -29,6 +31,18 @@ class TestDoubanService:
         feed = self.client.SearchPeople("阿北")
         assert any( e.title.text == "阿北" for e in feed.entry)
 
+    def test_authorized_UID(self):
+	people = self.client.GetAuthorizedUID('/people/@me')
+	assert people.uid.text == '2463802'
+    
+    def test_get_friends(self):
+	feed = self.client.GetFriends('/people/2463802/friends')
+	assert any( e.uid.text == 'jili8' for e in feed.entry)
+    
+    def test_get_contacts(self):
+	feed = self.client.GetFriends('/people/2463802/contacts')
+	assert any( e.uid.text == 'youha' for e in feed.entry)
+    
     def test_query_book_by_tag(self):
         feed = self.client.QueryBookByTag("小说")
         assert len(feed.entry)
@@ -52,25 +66,19 @@ class TestDoubanService:
         assert entry.rating.min == '1'
         assert entry.rating.max == '5'
         #assert entry.rating.average == '4.71'
-
-
-
+    
     def test_collection(self):
         book_uri = '/book/subject/1489401'
         subject = self.client.GetBook(book_uri)
 
-        assert subject.tag[0].name == '童话'
         
         entry = self.client.AddCollection('wish', subject, tag=['nice', '安徒生'])
         assert entry.status.text == 'wish'
         assert len(entry.tags) == 2
         assert entry.tags[0].name == 'nice'
         assert entry.tags[1].name == '安徒生'
-        
         entry = self.client.GetCollection(entry.GetSelfLink().href)
-        print entry
-
-        assert entry.status.text == 'wish'
+	assert entry.status.text == 'wish'
         assert len(entry.tags) == 2
         assert entry.tags[0].name == 'nice'
         
@@ -92,6 +100,8 @@ class TestDoubanService:
 
         assert entry.title.text == 'good'
         assert entry.rating.value == '4'
+	feed = self.client.GetReviewFeed('/book/subject/1489401/reviews', orderby='score')
+	assert any(entry.title.text == 'good' for entry in feed.entry)
         self.client.DeleteReview(entry)
 
  
