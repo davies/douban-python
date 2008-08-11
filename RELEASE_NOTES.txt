@@ -1,3 +1,7 @@
+===0.2.1===
+August 11, 2008 (revision 27)
+- Use API_KEY and secret for verification in Get method.
+
 === 0.2 ===
 August 6, 2008 (revision 26)
 

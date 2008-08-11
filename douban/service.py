@@ -6,6 +6,9 @@ import douban
 import urllib
 import oauth, client
 
+signature_method = oauth.OAuthSignatureMethod_HMAC_SHA1()
+AUTH_HOST = 'http://www.douban.com'
+REQUEST_TOKEN_URL = AUTH_HOST+'/service/auth/request_token'
 class DoubanService(gdata.service.GDataService):
     def __init__(self, api_key=None, secret=None,
             source='douban-python', server='api.douban.com', 
@@ -22,16 +25,18 @@ class DoubanService(gdata.service.GDataService):
         return self.client.login(token_key, token_secret)
 
     def Get(self, uri, extra_headers={}, *args, **kwargs):
-        auth_header = self.client.get_auth_header('GET', uri)
-        if auth_header:
-            extra_headers.update(auth_header)
-        elif self.api_key:
-            param = urllib.urlencode([('apikey', self.api_key)])
-            if '?' in uri:
-                uri += '&' + param
-            else:
-                uri += '?' + param
-        return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)
+	auth_header = self.client.get_auth_header('GET', uri)
+	oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.client.consumer,
+							           http_url=REQUEST_TOKEN_URL)
+	oauth_request.sign_request(signature_method, self.client.consumer, None)
+	param = oauth_request.to_postdata()
+	if auth_header:
+	    extra_headers.update(auth_header)
+	if '?' in uri:
+	    uri += '&' + param
+	else:
+	    uri += '?' + param
+	return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)
 
     def Post(self, data, uri, extra_headers=None, url_params=None, *args, **kwargs):
         if extra_headers is None:
