@@ -31,8 +31,7 @@ class DoubanService(gdata.service.GDataService):
                 uri += '&' + param
             else:
                 uri += '?' + param
-        return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)
-
+        return gdata.service.GDataService.Get(self, uri, extra_headers, *args, **kwargs)		
     def Post(self, data, uri, extra_headers=None, url_params=None, *args, **kwargs):
         if extra_headers is None:
             extra_headers = {}
@@ -51,7 +50,8 @@ class DoubanService(gdata.service.GDataService):
         if extra_headers is None:
             extra_headers = {}
         extra_headers.update(self.client.get_auth_header('DELETE', uri, url_params))
-        return gdata.service.GDataService.Delete(self, uri, extra_headers, url_params, *args, **kwargs)
+        return gdata.service.GDataService.Delete(self, 
+		uri, extra_headers, url_params, *args, **kwargs)
 
     def GetPeople(self, uri):
         return self.Get(uri, converter=douban.PeopleEntryFromString)
@@ -201,7 +201,23 @@ class DoubanService(gdata.service.GDataService):
 
     def GetTagFeed(self, uri):
         return self.Get(uri, converter=douban.TagFeedFromString)
+  
+    def GetBroadcastingFeed(self, uri, start_index=None, max_results=None):
+	query = Query(uri, text_query=None, 
+		start_index=start_index, max_results=max_results)
+	return self.Get(query.ToUri(), converter=douban.BroadcastingFeedFromString)
+    
+    def GetContactsBroadcastingFeed(self, uri, start_index=None, max_results=None):
+	query = Query(uri, text_query=None, 
+		start_index=start_index, max_results=max_results)
+	return self.Get(query.ToUri(), converter=douban.BroadcastingFeedFromString)
 
+    def AddBroadcasting(self, uri, entry):
+	return self.Post(entry, uri, converter=douban.BroadcastingEntryFromString)
+
+    def DeleteBroadcasting(self, entry):
+        uri = entry.id.text
+        return self.Delete(uri)
 
 class Query(gdata.service.Query):
     def __init__(self, feed=None, text_query=None, start_index=None,

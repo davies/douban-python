@@ -2,13 +2,12 @@
 
 import douban.service
 import urllib
+import atom
 
 SERVER='api.douban.com'
 # for user apitest
 API_KEY=''
 SECRET=''
-TOKEN_KEY=''
-TOKEN_SECRET=''
 
 class TestDoubanService:
     def __init__(self):
@@ -103,5 +102,18 @@ class TestDoubanService:
 	feed = self.client.GetReviewFeed('/book/subject/1489401/reviews', orderby='score')
 	assert any(entry.title.text == 'good' for entry in feed.entry)
         self.client.DeleteReview(entry)
+    
+    def test_broadcasting(self):
+	uri = '/people/sakinijino/miniblog'
+	broadcastingfeed = self.client.GetBroadcastingFeed(uri, 1, 2)
+	entry = broadcastingfeed.entry[0];
+	#assert any(cate.term == "http://www.douban.com/2007#miniblog.blog" for cate in entry.category)
 
- 
+	contacturi = '/people/2463802/miniblog/contacts'
+	broadcastingfeed = self.client.GetContactsBroadcastingFeed(contacturi, 1, 2)
+	entry = broadcastingfeed.entry[0]
+	#assert any(cate.term == "http://www.douban.com/2007#miniblog.saying" for cate in entry.category)
+ 	entry = douban.BroadcastingEntry()
+	entry.content = atom.Content(text = "You should not see this")
+	entry = self.client.AddBroadcasting("/miniblog/saying", entry)
+	self.client.DeleteBroadcasting(entry)

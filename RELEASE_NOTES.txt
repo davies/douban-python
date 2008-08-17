@@ -1,6 +1,14 @@
-===0.2.1===
-August 11, 2008 (revision 27)
-- Use API_KEY and secret for verification in Get method.
+===0.2.2===
+August 17, 2008 (revision 32)
+
+- __init__.py
+  - Add class BroadcastingEntry and BroadcastingFeed.
+  - Add method BroadcastingEntryFromString and BroadcastingFeedFromString.
+- service.py
+  - Add GetBroadcastingFeed to DoubanService, which can help to access user's broadcasting.
+  - Add GetContactsBroadcastingFeed to DoubanService, which can help to access contacts' broadcasting.
+  - Add AddBroadcasting to DoubanService, which can help to add broadcasting.
+  - Add DeleteBroadcasting to DoubanService, which can help to delete broadcasting.
 
 === 0.2 ===
 August 6, 2008 (revision 26)

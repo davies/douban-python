@@ -216,6 +216,31 @@ class MusicFeed(gdata.GDataFeed):
 def MusicFeedFromString(xml_string):
     return CreateClassFromXMLString(MusicFeed, xml_string)
 
+class BroadcastingEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+    _children['{%s}attribute' % (DOUBAN_NAMESPACE)] = ('attribute', [Attribute])
+
+    def __init__(self, attribute=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+        self.attribute = attribute or []
+    
+
+def BroadcastingEntryFromString(xml_string):
+    return CreateClassFromXMLString(BroadcastingEntry, xml_string)
+
+
+class BroadcastingFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [BroadcastingEntry])
+
+def BroadcastingFeedFromString(xml_string):
+    return CreateClassFromXMLString(BroadcastingFeed, xml_string)
 
 class ReviewEntry(gdata.GDataEntry):
     _tag = gdata.GDataEntry._tag
@@ -288,3 +313,4 @@ class TagFeed(gdata.GDataFeed):
 
 def TagFeedFromString(xml_string):
     return CreateClassFromXMLString(TagFeed, xml_string)
+
