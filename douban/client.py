@@ -33,7 +33,6 @@ class OAuthClient:
         line = raw_input()
         
         key, secret = self.get_access_token(key, secret)
-        print key, secret
         if key:
             return self.login(key, secret)
         else:
