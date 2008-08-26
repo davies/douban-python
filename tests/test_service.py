@@ -3,12 +3,15 @@
 import douban.service
 import urllib
 import atom
+import douban
 
 SERVER='api.douban.com'
 # for user apitest
+
 API_KEY=''
 SECRET=''
-
+TOKEN_KEY=''
+TOKEN_SECRET=''
 class TestDoubanService:
     def __init__(self):
         self.client = douban.service.DoubanService(server=SERVER,
@@ -70,26 +73,23 @@ class TestDoubanService:
         book_uri = '/book/subject/1489401'
         subject = self.client.GetBook(book_uri)
 
-        
-        entry = self.client.AddCollection('wish', subject, tag=['nice', '安徒生'])
+        entry = self.client.AddCollection('wish', subject, tag=['read', '安徒生'], private=True)
         assert entry.status.text == 'wish'
         assert len(entry.tags) == 2
-        assert entry.tags[0].name == 'nice'
+        assert entry.tags[0].name == 'read'
         assert entry.tags[1].name == '安徒生'
         entry = self.client.GetCollection(entry.GetSelfLink().href)
 	assert entry.status.text == 'wish'
         assert len(entry.tags) == 2
-        assert entry.tags[0].name == 'nice'
-        
-        #entry = self.client.UpdateCollection(entry, 'read', ['gnice', '安徒生', '童话'], rating=3)
-        entry = self.client.UpdateCollection(entry, 'read', rating=3)
+        entry = self.client.UpdateCollection(entry, 'read', ['read', '安徒生', '童话'], rating=3, private=True)
         assert entry.status.text == 'read'
         assert entry.rating.value == '3'
-        assert entry.tags[0].name == 'nice'
+        assert entry.tags[0].name == 'read'
         assert entry.tags[1].name == '安徒生'
-        
-
         assert self.client.DeleteCollection(entry)
+
+	feed = self.client.GetMyCollection('/people/2463802/collection', 'book', 'read', 'wish', '1', '3', '2008-12-28T21:47:00+08:00', '2007-12-28T21:47:00+08:00')
+	assert len(feed.entry)
 
     def test_review(self):
         book_uri = '/book/subject/1489401'
@@ -117,3 +117,20 @@ class TestDoubanService:
 	entry.content = atom.Content(text = "You should not see this")
 	entry = self.client.AddBroadcasting("/miniblog/saying", entry)
 	self.client.DeleteBroadcasting(entry)
+  
+    def test_note(self):
+	uri = '/note/17030527'
+	entry = self.client.GetNote(uri)
+	assert entry.content.text == 'my note'
+	assert entry.title.text == 'my note'
+	entry = douban.NoteEntry()
+	entry.title = atom.Title(text="a test note")
+        entry.content = atom.Content(text="this note is for testing") 
+	entry = self.client.AddNote("/notes", entry, False, True)
+	assert entry.title.text == 'a test note'
+        entry = self.client.UpdateNote(entry, 'it a good day!', 'my good note', True, False);
+	assert entry.title.text == 'my good note'
+	self.client.DeleteNote(entry)
+	
+      	feed = self.client.GetMyNotes('/people/2463802/notes', 1, 2)
+	assert any(entry.title.text == 'a test note' for entry in feed.entry)

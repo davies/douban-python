@@ -242,6 +242,32 @@ class BroadcastingFeed(gdata.GDataFeed):
 def BroadcastingFeedFromString(xml_string):
     return CreateClassFromXMLString(BroadcastingFeed, xml_string)
 
+class NoteEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+    _children['{%s}attribute' % (DOUBAN_NAMESPACE)] = ('attribute', [Attribute])
+
+    def __init__(self, attribute=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+        self.attribute = attribute or []
+    
+
+def NoteEntryFromString(xml_string):
+    return CreateClassFromXMLString(NoteEntry, xml_string)
+
+
+class NoteFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [NoteEntry])
+
+def NoteFeedFromString(xml_string):
+    return CreateClassFromXMLString(NoteFeed, xml_string)
+
 class ReviewEntry(gdata.GDataEntry):
     _tag = gdata.GDataEntry._tag
     _namespace = gdata.GDataEntry._namespace
@@ -279,14 +305,16 @@ class CollectionEntry(gdata.GDataEntry):
     _children['{%s}subject' % (DOUBAN_NAMESPACE)] = ('subject', Subject)
     _children['{%s}tag' % (DOUBAN_NAMESPACE)] = ('tags', [Tag])
     _children['{%s}rating' % (gdata.GDATA_NAMESPACE)] = ('rating', Rating)
+    _children['{%s}attribute' % (gdata.GDATA_NAMESPACE)] = ('attribute', [Attribute])
 
-    def __init__(self, status=None, subject=None, tag=None, rating=None,
+    def __init__(self, status=None, subject=None, tag=None, rating=None, attribute=None,
             **kwargs):
         gdata.GDataEntry.__init__(self, **kwargs)
         self.status = status
         self.subject = subject
         self.tags = tag or []
         self.rating = rating
+	self.attribute = attribute or []
 
 def CollectionEntryFromString(xml_string):
     return CreateClassFromXMLString(CollectionEntry, xml_string)

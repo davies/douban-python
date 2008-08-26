@@ -1,3 +1,19 @@
+===0.2.3===
+August 26, 2008 (revision 33)
+
+- __init__.py
+  - Add class NoteEntry and NoteFeed.
+  - Add method NoteEntryFromString and NoteFeedFromString.
+  - Add Attribute to CollectionEntry.
+- service.py
+  - Change method GetMyCollection, which help to get user's private or public collections.
+  - Add support for privacy setting in  method AddCollection.
+  - Add GetNote to DoubanService, which can help to access NoteEntry.
+  - Add GetMyNotes to DoubanService, which can help to access user's notes.
+  - Add AddNote to DoubanService, which can help to add notes.
+  - Add UpdateNote to DoubanService, which can help to update notes.
+  - Add DeleteNote to DoubanService, which can help to delete notes.
+
 ===0.2.2===
 August 17, 2008 (revision 32)
 
