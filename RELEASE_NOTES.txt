@@ -1,5 +1,5 @@
 ===0.2.4===
-November 28, 2008 (revision 42)
+October 28, 2008 (revision 42)
 
 - __init__.py
   - Add class EventEntry and EventFeed.
