@@ -1,3 +1,25 @@
+===0.2.4===
+November 28, 2008 (revision 33)
+
+- __init__.py
+  - Add class EventEntry and EventFeed.
+  - Add method EventEntryFromString and EventFeedFromString.
+  - Add When and Where.
+- service.py
+  - Add GetEvent to DoubanService, which can help to access EventEntry.
+  - Add GetEvents to DoubanService, which can help to access user's Events.
+  - Add GetEventWishers to DoubanService, which can help to access event's
+    wishers.
+  - Add GetEventParticipants to DoubanService, which can help to access
+    event's participants.
+  - Add GetLocationEvents to DoubanService, which can help to access events in
+    particular location.
+  - Add SearchEvents to DoubanService, which can help to search events.
+  - Add AddEvent to DoubanService, which can help to add event.
+  - Add UpdateEvent to DoubanService, which can help to update event.
+  - Add DeleteEvent to DoubanService, which can help to delete event.
+
+
 ===0.2.3===
 August 26, 2008 (revision 33)
 

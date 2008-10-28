@@ -109,7 +109,6 @@ def CreateClassFromXMLString(target_class, xml_string):
     return atom.CreateClassFromXMLString(target_class,
             xml_string.decode('utf8'), 'utf8')
 
-
 class PeopleEntry(gdata.GDataEntry):
     _tag = gdata.GDataEntry._tag
     _namespace = gdata.GDataEntry._namespace
@@ -124,7 +123,6 @@ class PeopleEntry(gdata.GDataEntry):
 
 def PeopleEntryFromString(xml_string):
     return CreateClassFromXMLString(PeopleEntry, xml_string)
-
 
 class PeopleFeed(gdata.GDataFeed):
     _tag = gdata.GDataFeed._tag
@@ -342,3 +340,63 @@ class TagFeed(gdata.GDataFeed):
 def TagFeedFromString(xml_string):
     return CreateClassFromXMLString(TagFeed, xml_string)
 
+class When(atom.AtomBase):
+
+    _tag = 'when'
+    _namespace = gdata.GDATA_NAMESPACE
+    _children = atom.AtomBase._children.copy()
+    _attributes = atom.AtomBase._attributes.copy()
+    _attributes['startTime'] = 'start_time'
+    _attributes['endTime'] = 'end_time'
+
+  def __init__(self, start_time=None, end_time=None, extension_elements=None, 
+          extension_attributes=None, text=None):
+    self.start_time = start_time 
+    self.end_time = end_time 
+    self.extension_elements = extension_elements or []
+    self.extension_attributes = extension_attributes or {}
+    self.text = text
+
+class Where(atom.AtomBase):
+
+    _tag = 'where'
+    _namespace = gdata.GDATA_NAMESPACE
+    _children = atom.AtomBase._children.copy()
+    _attributes = atom.AtomBase._attributes.copy()
+    _attributes['valueString'] = 'value_string'
+
+  def __init__(self, value_string=None, extension_elements=None, 
+          extension_attributes=None, text=None):
+    self.value_string = value_string 
+    self.extension_elements = extension_elements or []
+    self.extension_attributes = extension_attributes or {}
+    self.text = text
+
+class EventEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+    _children['{%s}attribute' % (DOUBAN_NAMESPACE)] = ('attribute', [Attribute])
+    _children['{%s}where' % gdata.GDATA_NAMESPACE] = ('where', Where)
+    _children['{%s}when' % gdata.GDATA_NAMESPACE] = ('when', When)
+
+    def __init__(self, attribute=None, when=None, where=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+        self.attribute = attribute or []
+        self.when = when
+        self.where = where
+    
+
+def EventEntryFromString(xml_string):
+    return CreateClassFromXMLString(EventEntry, xml_string)
+
+class EventFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [EventEntry])
+
+def EventFeedFromString(xml_string):
+    return CreateClassFromXMLString(EventFeed, xml_string)

@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 import atom
+import gdata
 import gdata.service
 import douban
 import urllib
@@ -125,8 +126,7 @@ class DoubanService(gdata.service.GDataService):
         return self.Get(uri, converter=douban.ReviewEntryFromString)
 
     def GetReviewFeed(self, uri, orderby = 'score'):
-	query = Query(uri, text_query=None, 
-		start_index=None, max_results=None, orderby=orderby)
+        query = Query(uri, text_query=None, start_index=None, max_results=None, orderby=orderby)
         return self.Get(query.ToUri(), converter=douban.ReviewFeedFromString)
 
     def CreateReview(self, title, content, subject, rating=None):
@@ -291,10 +291,63 @@ class DoubanService(gdata.service.GDataService):
         return self.Put(entry, uri, converter=douban.NoteEntryFromString)
 
     def DeleteNote(self, entry):
-	 uri = entry.id.text
-	 return self.Delete(uri)
+        uri = entry.id.text
+        return self.Delete(uri)
 
+    def GetEvent(self, uri):
+        return self.Get(uri, converter=douban.EventEntryFromString)
 
+    def GetEventFeed(self, uri):
+        return self.Get(uri, converter=douban.EventFeedFromString)
+
+    def SearchEvent(self, text_query, location, start_index=None, max_results=None):
+        query = Query('/events', text_query, location=location, start_index=start_index,
+                max_results=max_results)
+        return self.GetEventFeed(query.ToUri())
+
+    def GetLocationEvents(self, location, type=None, start_index=None, max_results=None):
+        query = Query('/event/location/%s' %location, type=type or 'all', start_index=start_index, max_results=max_results)
+        return self.GetEventFeed(query.ToUri())
+ 
+    def GetEvents(self, uri, start_index=None, max_results=None, status=None):
+        query = Query('%s%s' %(uri, status and '/%s' %status or ''), start_index=start_index, max_results=max_results)
+        return self.Get(query.ToUri(), converter=douban.EventFeedFromString)
+
+    def GetEventWishers(self, uri, start_index=None, max_results=None):
+        query = Query('%s/wishers'%uri, start_index=start_index, max_results=max_results)
+        return self.Get(query.ToUri(), converter=douban.PeopleFeedFromString)
+
+    def GetEventParticipants(self, uri, start_index=None, max_results=None):
+        query = Query('%s/participants'%uri, start_index=start_index, max_results=max_results)
+        return self.Get(query.ToUri(), converter=douban.PeopleFeedFromString)
+
+    def DeleteEventWisher(self, uri):
+        return self.Delete('%s/wishers' %uri)
+        
+    def DeleteEventParticipants(self, uri):
+        return self.Delete('%s/participants' %uri)
+ 
+    def AddEvent(self, uri, entry, invite_only=False, can_invite=True):
+        entry.attribute.append(douban.Attribute('invite_only', invite_only and 'yes' or 'no'))
+        entry.attribute.append(douban.Attribute('can_invite', can_invite and 'yes' or 'no'))
+        return self.Post(entry, uri, converter=douban.EventEntryFromString)
+
+    def UpdateEvent(self, entry, content, title, invite_only=False, can_invite=True):
+        if isinstance(entry, (str, unicode)):
+            entry = self.Get(entry, douban.EventEntryFromString)
+            
+        entry.title = atom.Title(text=title)
+        entry.content = atom.Content(text=content)
+        entry.attribute.append(douban.Attribute('invite_only', invite_only and 'yes' or 'no'))
+        entry.attribute.append(douban.Attribute('can_invite', can_invite and 'yes' or 'no'))
+        uri = entry.GetSelfLink().href
+        return self.Put(entry, uri, converter=douban.EventEntryFromString)
+
+    def DeleteEvent(self, entry, reason):
+        uri = entry.GetSelfLink().href+'/delete'
+        entry = gdata.GDataEntry()
+        entry.content = atom.Content(text=reason)
+        return self.Post(entry, uri)
 
 class Query(gdata.service.Query):
     def __init__(self, feed=None, text_query=None, start_index=None,
