@@ -349,13 +349,13 @@ class When(atom.AtomBase):
     _attributes['startTime'] = 'start_time'
     _attributes['endTime'] = 'end_time'
 
-  def __init__(self, start_time=None, end_time=None, extension_elements=None, 
+    def __init__(self, start_time=None, end_time=None, extension_elements=None, 
           extension_attributes=None, text=None):
-    self.start_time = start_time 
-    self.end_time = end_time 
-    self.extension_elements = extension_elements or []
-    self.extension_attributes = extension_attributes or {}
-    self.text = text
+        self.start_time = start_time 
+        self.end_time = end_time 
+        self.extension_elements = extension_elements or []
+        self.extension_attributes = extension_attributes or {}
+        self.text = text
 
 class Where(atom.AtomBase):
 
@@ -365,12 +365,12 @@ class Where(atom.AtomBase):
     _attributes = atom.AtomBase._attributes.copy()
     _attributes['valueString'] = 'value_string'
 
-  def __init__(self, value_string=None, extension_elements=None, 
+    def __init__(self, value_string=None, extension_elements=None, 
           extension_attributes=None, text=None):
-    self.value_string = value_string 
-    self.extension_elements = extension_elements or []
-    self.extension_attributes = extension_attributes or {}
-    self.text = text
+        self.value_string = value_string 
+        self.extension_elements = extension_elements or []
+        self.extension_attributes = extension_attributes or {}
+        self.text = text
 
 class EventEntry(gdata.GDataEntry):
     _tag = gdata.GDataEntry._tag
