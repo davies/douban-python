@@ -224,11 +224,9 @@ class BroadcastingEntry(gdata.GDataEntry):
     def __init__(self, attribute=None, **kwargs):
         gdata.GDataEntry.__init__(self, **kwargs)
         self.attribute = attribute or []
-    
 
 def BroadcastingEntryFromString(xml_string):
     return CreateClassFromXMLString(BroadcastingEntry, xml_string)
-
 
 class BroadcastingFeed(gdata.GDataFeed):
     _tag = gdata.GDataFeed._tag
@@ -386,7 +384,6 @@ class EventEntry(gdata.GDataEntry):
         self.attribute = attribute or []
         self.when = when
         self.where = where
-    
 
 def EventEntryFromString(xml_string):
     return CreateClassFromXMLString(EventEntry, xml_string)
@@ -400,3 +397,49 @@ class EventFeed(gdata.GDataFeed):
 
 def EventFeedFromString(xml_string):
     return CreateClassFromXMLString(EventFeed, xml_string)
+
+class RecommendationEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+    _children['{%s}attribute' % (DOUBAN_NAMESPACE)] = ('attribute', [Attribute])
+
+    def __init__(self, attribute=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+        self.attribute = attribute or []
+
+def RecommendationEntryFromString(xml_string):
+    return CreateClassFromXMLString(RecommendationEntry, xml_string)
+
+class RecommendationFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [RecommendationEntry])
+
+def RecommendationFeedFromString(xml_string):
+    return CreateClassFromXMLString(RecommendationFeed, xml_string)
+
+class RecommendationCommentEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+
+    def __init__(self, attribute=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+
+def RecommendationCommentEntryFromString(xml_string):
+    return CreateClassFromXMLString(RecommendationCommentEntry, xml_string)
+
+class RecommendationCommentFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [RecommendationEntry])
+
+def RecommendationCommentFeedFromString(xml_string):
+    return CreateClassFromXMLString(RecommendationCommentFeed, xml_string)

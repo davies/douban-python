@@ -163,4 +163,17 @@ class TestDoubanService:
         events = self.client.GetEvents('/people/aka/events')#, status='initiate')
         assert any(e.title.text == '豆瓣私家猫照片汇' for e in events.entry)
 
+    def test_recommendation(self):
+        rec = self.client.GetRecommendation('/recommendation/3671284')
+        assert rec.title.text == '推荐兽白|俾斯多玛斯多的照片'
 
+        comment = self.client.AddRecommendationComment(rec, 'test')
+        assert comment.content.text == 'test'
+
+        comments = self.client.GetRecommendationComments(rec.id.text+'/comments')
+
+        recs =self.client.GetRecommendations('/people/aka/recommendations')
+
+        rec = self.client.AddRecommendation('test', 'http://www.douban.com', 'test')
+        assert rec.title.text == '推荐test'
+        self.client.DeleteRecommendation(rec)
