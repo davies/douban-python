@@ -380,6 +380,41 @@ class DoubanService(gdata.service.GDataService):
     def DeleteRecommendationComment(self, entry):
         return self.Delete(entry.id.text)
 
+    def GetDoumail(self, uri):
+        return self.Get(uri, converter=douban.DoumailEntryFromString)
+
+    def GetDoumailFeed(self, uri):
+        return self.Get(uri, converter=douban.DoumailFeedFromString)
+
+    def AddDoumail(self, receiverURI, subject, body):
+        entry = douban.DoumailEntry()
+        entry.entity.append(douban.Entity('receiver', "",extension_elements=[atom.Uri(text=receiverURI)]))
+        entry.title = atom.Title(text=subject)
+        entry.content = atom.Content(text=body)
+
+        return self.Post(entry, '/doumails', converter=douban.DoumailEntryFromString)
+
+    def DeleteDoumail(self, entry):
+        uri = entry.GetSelfLink().href  
+        return self.Delete(uri)
+
+    def DeleteDoumails(self, uris):
+        feed = gdata.GDataFeed()
+        for uri in uris:
+            entry = gdata.GDataEntry()
+            entry.id = atom.Id(text=uri)
+            feed.entry.append(entry)
+        return self.Post(feed, '/doumail/delete')
+
+    def MarkDoumailRead(self, uris):
+        feed = gdata.GDataFeed()
+        for uri in uris:
+            entry = gdata.GDataEntry()
+            entry.id = atom.Id(text=uri)
+            entry.attribute = []
+            entry.attribute.append(douban.Attribute('unread', 'false'))
+            feed.entry.append(entry)
+        return self.Put(feed, '/doumail/')
 
 class Query(gdata.service.Query):
     def __init__(self, feed=None, text_query=None, start_index=None,

@@ -73,6 +73,16 @@ class Attribute(atom.AtomBase):
         self.index = _t(index)
         self.lang = lang
 
+class Entity(atom.AtomBase):
+    _tag = 'entity'
+    _namespace = DOUBAN_NAMESPACE
+    _children = atom.AtomBase._children.copy()
+    _attributes = atom.AtomBase._attributes.copy()
+    _attributes['name'] = 'name'
+
+    def __init__(self, name=None, value=None, **kwargs):
+        atom.AtomBase.__init__(self, text=value, **kwargs)
+        self.name = name
 
 class Tag(atom.AtomBase):
     _tag = 'tag'
@@ -443,3 +453,32 @@ class RecommendationCommentFeed(gdata.GDataFeed):
 
 def RecommendationCommentFeedFromString(xml_string):
     return CreateClassFromXMLString(RecommendationCommentFeed, xml_string)
+
+class DoumailEntry(gdata.GDataEntry):
+    _tag = gdata.GDataEntry._tag
+    _namespace = gdata.GDataEntry._namespace
+    _children = gdata.GDataEntry._children.copy()
+    _attributes = gdata.GDataEntry._attributes.copy()
+    _children['{%s}attribute' % (DOUBAN_NAMESPACE)] = ('attribute', [Attribute])
+    _children['{%s}entity' % (DOUBAN_NAMESPACE)] = ('entity', [Entity])
+
+    def __init__(self, attribute=None, entity=None, **kwargs):
+        gdata.GDataEntry.__init__(self, **kwargs)
+        self.attribute = attribute or []
+        self.entity = entity or []
+
+def DoumailEntryFromString(xml_string):
+    print xml_string
+    return CreateClassFromXMLString(DoumailEntry, xml_string)
+
+class DoumailFeed(gdata.GDataFeed):
+    _tag = gdata.GDataFeed._tag
+    _namespace = gdata.GDataFeed._namespace
+    _children = gdata.GDataFeed._children.copy()
+    _attributes = gdata.GDataFeed._attributes.copy()
+    _children['{%s}entry' % (atom.ATOM_NAMESPACE)] = ('entry', [DoumailEntry])
+
+def DoumailFeedFromString(xml_string):
+    return CreateClassFromXMLString(DoumailFeed, xml_string)
+
+

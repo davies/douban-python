@@ -177,3 +177,17 @@ class TestDoubanService:
         rec = self.client.AddRecommendation('test', 'http://www.douban.com', 'test')
         assert rec.title.text == '推荐test'
         self.client.DeleteRecommendation(rec)
+
+    def test_doumail(self):
+#       m = self.client.GetDoumail('/doumail/19965365')
+#       ms = self.client.GetDoumailFeed('/doumail/inbox')
+#        ms = self.client.GetDoumailFeed('/doumail/inbox/unread')
+#        for m in ms.entry:
+#            print m.title.text, m.id.text
+#        ms = self.client.GetDoumailFeed('/doumail/outbox')
+
+        p = GetPeople(self, '/people/@me'):
+        m = self.client.AddDoumail(p.id.text, 'from api', 'from api')
+        assert m.title.text == 'from api'
+#        assert self.client.MarkDoumailRead([m.id.text])
+        assert self.client.DeleteDoumail(m)
