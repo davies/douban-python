@@ -186,7 +186,7 @@ class TestDoubanService:
 #            print m.title.text, m.id.text
 #        ms = self.client.GetDoumailFeed('/doumail/outbox')
 
-        p = GetPeople(self, '/people/@me'):
+        p = GetPeople(self, '/people/@me')
         m = self.client.AddDoumail(p.id.text, 'from api', 'from api')
         assert m.title.text == 'from api'
 #        assert self.client.MarkDoumailRead([m.id.text])

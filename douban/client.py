@@ -32,7 +32,7 @@ class OAuthClient:
         print url
         line = raw_input()
         
-        key, secret = self.get_access_token(key, secret)
+        key, secret, uid = self.get_access_token(key, secret)
         if key:
             return self.login(key, secret)
         else:

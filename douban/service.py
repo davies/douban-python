@@ -394,6 +394,16 @@ class DoubanService(gdata.service.GDataService):
 
         return self.Post(entry, '/doumails', converter=douban.DoumailEntryFromString)
 
+    def AddCaptchaDoumail(self, receiverURI, subject, body, captcha_token, captacha_string):
+        entry = douban.DoumailEntry()
+        entry.entity.append(douban.Entity('receiver', "",extension_elements=[atom.Uri(text=receiverURI)]))
+        entry.title = atom.Title(text=subject)
+        entry.content = atom.Content(text=body)
+        entry.attribute = []
+        entry.attribute.append(douban.Attribute('captcha_string', captacha_string))
+        entry.attribute.append(douban.Attribute('captcha_token', captcha_token))
+        return self.Post(entry, '/doumails', converter=douban.DoumailEntryFromString) 
+
     def DeleteDoumail(self, entry):
         uri = entry.GetSelfLink().href  
         return self.Delete(uri)
