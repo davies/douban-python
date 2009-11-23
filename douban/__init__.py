@@ -18,7 +18,7 @@ class Location(atom.AtomBase):
     _namespace = DOUBAN_NAMESPACE
     _children = atom.AtomBase._children.copy()
     _attributes = atom.AtomBase._attributes.copy()
-    
+
     def __init__(self, loc=None, **kwargs):
         atom.AtomBase.__init__(self, text=loc, **kwargs)
 
@@ -28,13 +28,13 @@ class Uid(atom.AtomBase):
     _namespace = DOUBAN_NAMESPACE
     _children = atom.AtomBase._children.copy()
     _attributes = atom.AtomBase._attributes.copy()
-    
+
     def __init__(self, loc=None, **kwargs):
         atom.AtomBase.__init__(self, text=loc, **kwargs)
 
 class Rating(atom.AtomBase):
     """As gdata.py has not defined this element, we do this here.
-    
+
     Should be removed when gdata.py includes the definition.
 
     """
@@ -48,7 +48,7 @@ class Rating(atom.AtomBase):
     _attributes['numRaters'] = 'numRaters'
     _attributes['value'] = 'value'
 
-    def __init__(self, value=None, average=None, 
+    def __init__(self, value=None, average=None,
             min=1, max=5, numRaters=1, **kwargs):
         atom.AtomBase.__init__(self, **kwargs)
         self.value = _t(value)
@@ -91,7 +91,7 @@ class Tag(atom.AtomBase):
     _attributes = atom.AtomBase._attributes.copy()
     _attributes['count'] = 'count'
     _attributes['name'] = 'name'
-    
+
     def __init__(self, name=None, count=None, **kwargs):
         atom.AtomBase.__init__(self, **kwargs)
         self.name = name
@@ -103,7 +103,7 @@ class Status(atom.AtomBase):
     _namespace = DOUBAN_NAMESPACE
     _children = atom.AtomBase._children.copy()
     _attributes = atom.AtomBase._attributes.copy()
-    
+
     def __init__(self, status=None, **kwargs):
         atom.AtomBase.__init__(self, text=status, **kwargs)
 
@@ -111,7 +111,7 @@ class Status(atom.AtomBase):
 class Count(atom.AtomBase):
     _tag = 'count'
     _namespace = DOUBAN_NAMESPACE
-    
+
     def __init__(self, count=None, **kwargs):
         atom.AtomBase.__init__(self, text=count, **kwargs)
 
@@ -160,17 +160,21 @@ class SubjectEntry(gdata.GDataEntry):
         self.attribute = attribute or []
         self.tag = tag or []
 
+    def GetImageLink(self):
+        for a_link in self.link:
+            if a_link.rel == 'image':
+                return a_link
+
+    def GetCollectionLink(self):
+        for a_link in self.link:
+            if a_link.rel == 'collection':
+                return a_link
 
 class Subject(SubjectEntry):
     """In some places we use <db:subject> to represent a subject entry."""
     _tag = 'subject'
     _namespace = DOUBAN_NAMESPACE
- 
-    def GetCollectionLink(self):
-        for a_link in self.link:
-            if a_link.rel == 'collection':
-		return a_link	
- 
+
 class BookEntry(SubjectEntry):
     pass
 
@@ -258,7 +262,7 @@ class NoteEntry(gdata.GDataEntry):
     def __init__(self, attribute=None, **kwargs):
         gdata.GDataEntry.__init__(self, **kwargs)
         self.attribute = attribute or []
-    
+
 
 def NoteEntryFromString(xml_string):
     return CreateClassFromXMLString(NoteEntry, xml_string)
@@ -337,7 +341,7 @@ class TagEntry(gdata.GDataEntry):
     _children = gdata.GDataEntry._children.copy()
     _children['{%s}count' % (DOUBAN_NAMESPACE)] = ('count', Count)
     def __init__(self, count=None, **kwargs):
-        
+
         gdata.GDataEntry.__init__(self, **kwargs)
         self.count = count
 
@@ -357,10 +361,10 @@ class When(atom.AtomBase):
     _attributes['startTime'] = 'start_time'
     _attributes['endTime'] = 'end_time'
 
-    def __init__(self, start_time=None, end_time=None, extension_elements=None, 
+    def __init__(self, start_time=None, end_time=None, extension_elements=None,
           extension_attributes=None, text=None):
-        self.start_time = start_time 
-        self.end_time = end_time 
+        self.start_time = start_time
+        self.end_time = end_time
         self.extension_elements = extension_elements or []
         self.extension_attributes = extension_attributes or {}
         self.text = text
@@ -373,9 +377,9 @@ class Where(atom.AtomBase):
     _attributes = atom.AtomBase._attributes.copy()
     _attributes['valueString'] = 'value_string'
 
-    def __init__(self, value_string=None, extension_elements=None, 
+    def __init__(self, value_string=None, extension_elements=None,
           extension_attributes=None, text=None):
-        self.value_string = value_string 
+        self.value_string = value_string
         self.extension_elements = extension_elements or []
         self.extension_attributes = extension_attributes or {}
         self.text = text
