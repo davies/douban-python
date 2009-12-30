@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
         name = 'douban-python',
-        version = '0.3.0',
+        version = '0.4',
         description = "Python client library for Douban APIs",
         license = "Apache 2.0",
         author = "Qiangning Hong",

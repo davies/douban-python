@@ -1,3 +1,4 @@
+RELEASE_NOTES.txt
 setup.py
 douban/__init__.py
 douban/client.py

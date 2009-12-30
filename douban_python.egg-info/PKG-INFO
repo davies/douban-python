@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: douban-python
-Version: 0.1.1
+Version: 0.3.0
 Summary: Python client library for Douban APIs
 Home-page: http://www.douban.com/service/apidoc/
 Author: Qiangning Hong
