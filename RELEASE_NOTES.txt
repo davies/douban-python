@@ -1,3 +1,13 @@
+===0.4===
+December 30, 2009 (revision 55)
+
+- add GetImageLink (thank taoyh23)
+
+===0.3.0===
+May 16, 2009 (revision 50)
+
+- a bunch of changes (sorry for no detail)
+
 ===0.2.4===
 October 28, 2008 (revision 42)
 
