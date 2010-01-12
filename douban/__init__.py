@@ -117,7 +117,7 @@ class Count(atom.AtomBase):
 
 def CreateClassFromXMLString(target_class, xml_string):
     return atom.CreateClassFromXMLString(target_class,
-            xml_string.decode('utf8'), 'utf8')
+            xml_string.decode('utf8', 'ignore'), 'utf8')
 
 class PeopleEntry(gdata.GDataEntry):
     _tag = gdata.GDataEntry._tag
