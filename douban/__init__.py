@@ -472,7 +472,6 @@ class DoumailEntry(gdata.GDataEntry):
         self.entity = entity or []
 
 def DoumailEntryFromString(xml_string):
-    print xml_string
     return CreateClassFromXMLString(DoumailEntry, xml_string)
 
 class DoumailFeed(gdata.GDataFeed):
